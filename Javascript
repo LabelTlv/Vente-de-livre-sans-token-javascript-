@@ -1,0 +1,50 @@
+// Initialisez Stripe avec votre clé publique
+const stripe = Stripe('pk_live_51OP8dDAT9pLK9vFC8gVq249lrGjDbaB28taxUK2580fjhCZ9TkeEHIsKgh5qKmzZkZjtWXL2KUvMyr6abPy4IqP200yqxYhnMy'); // Remplacez par votre clé publique Stripe
+const elements = stripe.elements();
+const cardElement = elements.create('card');
+cardElement.mount('#card-element');
+
+const form = document.getElementById('payment-form');
+
+async function createPaymentMethod() {
+    try {
+        const { paymentMethod, error } = await stripe.createPaymentMethod({
+            type: 'card',
+            card: cardElement
+        });
+
+        if (error) {
+            console.error('Erreur lors de la création du moyen de paiement :', error);
+            alert('Erreur : ' + error.message);
+            return null;
+        }
+
+        return paymentMethod;
+    } catch (err) {
+        console.error('Erreur inattendue :', err);
+        alert('Une erreur inattendue est survenue.');
+        return null;
+    }
+}
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const paymentMethod = await createPaymentMethod();
+    if (!paymentMethod) return;
+
+    // Ici, vous pourriez envoyer paymentMethod.id à votre serveur pour traiter le paiement
+    alert('Moyen de paiement ajouté au panier avec succès !');
+    document.getElementById('download-link').style.display = 'block'; // Affiche le lien de téléchargement
+});
+
+// Ajout de l'écouteur d'événements pour le bouton
+const paymentButton = document.getElementById('payment-button');
+paymentButton.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const paymentMethod = await createPaymentMethod();
+    if (paymentMethod) {
+        // Ici, vous pouvez traiter le moyen de paiement (envoi à votre serveur, etc.)
+        alert('Moyen de paiement ajouté au panier avec succès !');
+        document.getElementById('download-link').style.display = 'block'; // Affiche le lien de téléchargement
+    }
+});
